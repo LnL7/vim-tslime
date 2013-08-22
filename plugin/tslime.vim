@@ -48,11 +48,6 @@ function! Tmux_Pane_Numbers(A,L,P)
   return <SID>TmuxPanes()
 endfunction
 
-function! s:TmuxSessions()
-  let sessions = system("tmux list-sessions | sed -e 's/:.*$//'")
-  return sessions
-endfunction
-
 function! s:TmuxWindows()
   return system('tmux list-windows -t "' . g:tslime['session'] . '" | grep -e "^\w:" | sed -e "s/\s*([0-9].*//g"')
 endfunction
@@ -63,28 +58,11 @@ endfunction
 
 " set tslime.vim variables
 function! s:Tmux_Vars()
-  let names = split(s:TmuxSessions(), "\n")
   let g:tslime = {}
-  if len(names) == 1
-    let g:tslime['session'] = names[0]
-  else
-    let g:tslime['session'] = ''
-  endif
-  while g:tslime['session'] == ''
-    let g:tslime['session'] = input("session name: ", "", "custom,Tmux_Session_Names")
-  endwhile
 
-  let windows = split(s:TmuxWindows(), "\n")
-  if len(windows) == 1
-    let window = windows[0]
-  else
-    let window = input("window name: ", "", "custom,Tmux_Window_Names")
-    if window == ''
-      let window = windows[0]
-    endif
-  endif
+  let g:tslime['session'] = split(system("tmux display-message -p '#S'") , '\n')[0]
+  let g:tslime['window'] = split(system("tmux display-message -p '#I'") , '\n')[0]
 
-  let g:tslime['window'] =  substitute(window, ":.*$" , '', 'g')
 
   let panes = split(s:TmuxPanes(), "\n")
   if len(panes) == 1
