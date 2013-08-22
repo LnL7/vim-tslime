@@ -48,10 +48,6 @@ function! Tmux_Pane_Numbers(A,L,P)
   return <SID>TmuxPanes()
 endfunction
 
-function! s:TmuxWindows()
-  return system('tmux list-windows -t "' . g:tslime['session'] . '" | grep -e "^\w:" | sed -e "s/\s*([0-9].*//g"')
-endfunction
-
 function! s:TmuxPanes()
   return system('tmux list-panes -t "' . g:tslime['session'] . '":' . g:tslime['window'] . " | sed -e 's/:.*$//'")
 endfunction
