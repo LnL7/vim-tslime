@@ -80,8 +80,8 @@ function! ResetTmuxVars()
 endfunction
 command ResetTmuxVars call ResetTmuxVars()
 
-vmap <unique> <Plug>SendSelectionToTmux "ry :call Send_to_Tmux(@r)<CR>
-nmap <unique> <Plug>NormalModeSendToTmux vip <Plug>SendSelectionToTmux
+vn <unique> <Plug>SendSelectionToTmux "ry:call Send_to_Tmux(@r)<CR>
+nn <unique> <Plug>NormalModeSendToTmux "ryip:call Send_to_Tmux(@r)<CR>
 
 nmap <unique> <Plug>SetTmuxVars :call <SID>Tmux_Vars()<CR>
 
