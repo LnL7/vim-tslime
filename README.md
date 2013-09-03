@@ -13,6 +13,14 @@ account.
 branch. The version available in that branch isn't aware of panes so it
 will paste to pane 0 of the window.
 
+Default bindings
+-------------------
+
+gt<motion> " Send to pane
+
+gtt " Send line to pane
+
+
 Setting Keybindings
 -------------------
 

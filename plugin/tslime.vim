@@ -63,6 +63,7 @@ function! s:Tmux_Vars()
   let panes = split(s:TmuxPanes(), "\n")
   if len(panes) == 1
     let g:tslime['pane'] = panes[0]
+  " select alternate pane if only 2 panes
   elsei len(panes) == 2
     let curr_pane_index = split(
       \ system("tmux display-message -p '#P'"),
