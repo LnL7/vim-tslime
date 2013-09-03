@@ -16,7 +16,7 @@ function! Send_to_Tmux(text)
   end
 
   let oldbuffer = system(shellescape("tmux show-buffer"))
-  call <SID>set_tmux_buffer(a:text)
+  call <SID>set_tmux_buffer(a:text."\n")
   call system("tmux paste-buffer -t " . s:tmux_target())
   call <SID>set_tmux_buffer(oldbuffer)
 endfunction
@@ -76,8 +76,33 @@ function! ResetTmuxVars()
 endfunction
 command ResetTmuxVars call ResetTmuxVars()
 
-vn <unique> <Plug>SendSelectionToTmux "ry:call Send_to_Tmux(@r)<CR>
-nn <unique> <Plug>NormalModeSendToTmux "ryip:call Send_to_Tmux(@r)<CR>
+function! Send_to_Tmux_Motion(type, ...)
+  let sel_save = &selection
+  let &selection = "inclusive"
+  let reg_save = @@
+
+  if a:0  " Invoked from Visual mode, use '< and '> marks.
+    silent exe "normal! `<" . a:type . "`>y"
+  elseif a:type == 'line'
+    silent exe "normal! '[V']y"
+  elseif a:type == 'block'
+    silent exe "normal! `[\<C-V>`]y"
+  else
+    silent exe "normal! `[v`]y"
+  endif
+
+  call Send_to_Tmux(@@)
+
+  let &selection = sel_save
+  let @@ = reg_save
+endfunction
+
+nmap <silent> gt :set opfunc=Send_to_Tmux_Motion<CR>g@
+vmap <silent> gt :<C-U>call Send_to_Tmux_Motion(visualmode(), 1)<CR>
+nmap <silent> gtt :set opfunc=Send_to_Tmux_Motion<CR>0g@$
+
+vn <unique> <Plug>SendSelectionToTmux "Zy:call Send_to_Tmux(@Z)<CR>
+nn <unique> <Plug>NormalModeSendToTmux "Zyip:call Send_to_Tmux(@Z)<CR>
 
 nmap <unique> <Plug>SetTmuxVars :call <SID>Tmux_Vars()<CR>
 
