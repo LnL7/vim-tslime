@@ -68,8 +68,7 @@ function! s:Tmux_Vars()
     let curr_pane_index = split(
       \ system("tmux display-message -p '#P'"),
     \ '\n')[0]
-    let g:tslime['pane'] = filter(panes, 'v:val !~ ' . curr_pane_index
-    \ )[0]
+    let g:tslime['pane'] = filter(panes, 'v:val !~ '.curr_pane_index)[0]
   else
     let g:tslime['pane'] = input("pane number: ", "", "custom,Tmux_Pane_Numbers")
     if g:tslime['pane'] == ''
@@ -107,10 +106,3 @@ endfunction
 nmap <silent> gt :set opfunc=Send_to_Tmux_Motion<CR>g@
 vmap <silent> gt :<C-U>call Send_to_Tmux_Motion(visualmode(), 1)<CR>
 nmap <silent> gtt :set opfunc=Send_to_Tmux_Motion<CR>0g@$
-
-vn <unique> <Plug>SendSelectionToTmux "Zy:call Send_to_Tmux(@Z)<CR>
-nn <unique> <Plug>NormalModeSendToTmux "Zyip:call Send_to_Tmux(@Z)<CR>
-
-nmap <unique> <Plug>SetTmuxVars :call <SID>Tmux_Vars()<CR>
-
-command! -nargs=* Tx call Send_to_Tmux('<Args><CR>')

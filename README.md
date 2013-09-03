@@ -25,42 +25,6 @@ gtt " Send line to pane
 Setting Keybindings
 -------------------
 
-In this fork of tslime.vim, keybindings are not set automatically
-for you. Instead, you can map whatever you'd like to one of the
-plugin-specific bindings in your `.vimrc` file.
-
-To get the old defaults, put the following in your `.vimrc`:
-
-``` vim
-vmap <C-c><C-c> <Plug>SendSelectionToTmux
-nmap <C-c><C-c> <Plug>NormalModeSendToTmux
-nmap <C-c>r <Plug>SetTmuxVars
-```
-
-To send a selection in visual mode to vim, set the following in your `.vimrc`:
-
-``` vim
-vmap <your_key_combo> <Plug>SendSelectionToTmux
-```
-
-To grab the current method that a cursor is in normal mode, set the following:
-
-``` vim
-nmap <your_key_combo> <Plug>NormalModeSendToTmux
-```
-
-Use the following to reset the session, window, and pane info:
-
-``` vim
-nmap <your_key_combo> <Plug>SetTmuxVars
-```
-
-Have a command you run frequently, use this:
-
-``` vim
-nmap <your_key_combo> :Tx <your_command><CR>
-```
-
 Reset your tmux session, windows and panel mapping
 
 ```
