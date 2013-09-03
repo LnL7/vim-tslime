@@ -16,9 +16,10 @@ will paste to pane 0 of the window.
 Default bindings
 -------------------
 
+``` vim
 gt<motion> " Send to pane
-
 gtt " Send line to pane
+```
 
 
 Setting Keybindings
