@@ -68,11 +68,7 @@ function! s:Tmux_Vars()
     let curr_pane_index = split(
       \ system("tmux display-message -p '#P'"),
     \ '\n')[0]
-    let g:tslime['pane'] = filter(
-      \ split(
-        \ system('tmux list-panes -t "42":0'. " | sed -e 's/:.*$//'"),
-      \ '\n'),
-      \ 'v:val !~ ' . curr_pane_index
+    let g:tslime['pane'] = filter(panes, 'v:val !~ ' . curr_pane_index
     \ )[0]
   else
     let g:tslime['pane'] = input("pane number: ", "", "custom,Tmux_Pane_Numbers")
