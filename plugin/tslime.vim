@@ -16,7 +16,7 @@ function! Send_to_Tmux(text)
   end
 
   let oldbuffer = system(shellescape("tmux show-buffer"))
-  call <SID>set_tmux_buffer(a:text)
+  call <SID>set_tmux_buffer(a:text."\n")
   call system("tmux paste-buffer -t " . s:tmux_target())
   call <SID>set_tmux_buffer(oldbuffer)
 endfunction
@@ -48,47 +48,27 @@ function! Tmux_Pane_Numbers(A,L,P)
   return <SID>TmuxPanes()
 endfunction
 
-function! s:TmuxSessions()
-  let sessions = system("tmux list-sessions | sed -e 's/:.*$//'")
-  return sessions
-endfunction
-
-function! s:TmuxWindows()
-  return system('tmux list-windows -t "' . g:tslime['session'] . '" | grep -e "^\w:" | sed -e "s/\s*([0-9].*//g"')
-endfunction
-
 function! s:TmuxPanes()
   return system('tmux list-panes -t "' . g:tslime['session'] . '":' . g:tslime['window'] . " | sed -e 's/:.*$//'")
 endfunction
 
 " set tslime.vim variables
 function! s:Tmux_Vars()
-  let names = split(s:TmuxSessions(), "\n")
   let g:tslime = {}
-  if len(names) == 1
-    let g:tslime['session'] = names[0]
-  else
-    let g:tslime['session'] = ''
-  endif
-  while g:tslime['session'] == ''
-    let g:tslime['session'] = input("session name: ", "", "custom,Tmux_Session_Names")
-  endwhile
 
-  let windows = split(s:TmuxWindows(), "\n")
-  if len(windows) == 1
-    let window = windows[0]
-  else
-    let window = input("window name: ", "", "custom,Tmux_Window_Names")
-    if window == ''
-      let window = windows[0]
-    endif
-  endif
+  let g:tslime['session'] = split(system("tmux display-message -p '#S'") , '\n')[0]
+  let g:tslime['window'] = split(system("tmux display-message -p '#I'") , '\n')[0]
 
-  let g:tslime['window'] =  substitute(window, ":.*$" , '', 'g')
 
   let panes = split(s:TmuxPanes(), "\n")
   if len(panes) == 1
     let g:tslime['pane'] = panes[0]
+  " select alternate pane if only 2 panes
+  elsei len(panes) == 2
+    let curr_pane_index = split(
+      \ system("tmux display-message -p '#P'"),
+    \ '\n')[0]
+    let g:tslime['pane'] = filter(panes, 'v:val !~ '.curr_pane_index)[0]
   else
     let g:tslime['pane'] = input("pane number: ", "", "custom,Tmux_Pane_Numbers")
     if g:tslime['pane'] == ''
@@ -102,9 +82,27 @@ function! ResetTmuxVars()
 endfunction
 command ResetTmuxVars call ResetTmuxVars()
 
-vmap <unique> <Plug>SendSelectionToTmux "ry :call Send_to_Tmux(@r)<CR>
-nmap <unique> <Plug>NormalModeSendToTmux vip <Plug>SendSelectionToTmux
+function! Send_to_Tmux_Motion(type, ...)
+  let sel_save = &selection
+  let &selection = "inclusive"
+  let reg_save = @@
 
-nmap <unique> <Plug>SetTmuxVars :call <SID>Tmux_Vars()<CR>
+  if a:0  " Invoked from Visual mode, use '< and '> marks.
+    silent exe "normal! `<" . a:type . "`>y"
+  elseif a:type == 'line'
+    silent exe "normal! '[V']y"
+  elseif a:type == 'block'
+    silent exe "normal! `[\<C-V>`]y"
+  else
+    silent exe "normal! `[v`]y"
+  endif
 
-command! -nargs=* Tx call Send_to_Tmux('<Args><CR>')
+  call Send_to_Tmux(@@)
+
+  let &selection = sel_save
+  let @@ = reg_save
+endfunction
+
+nmap <silent> gt :set opfunc=Send_to_Tmux_Motion<CR>g@
+vmap <silent> gt :<C-U>call Send_to_Tmux_Motion(visualmode(), 1)<CR>
+nmap <silent> gtt :set opfunc=Send_to_Tmux_Motion<CR>0g@$
